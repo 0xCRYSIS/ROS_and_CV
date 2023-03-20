@@ -1,0 +1,18 @@
+#include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
+
+// Load the image using OpenCV
+cv::Mat img = cv::imread("example.jpg");
+
+// Convert the image to a ROS message using cv_bridge
+cv_bridge::CvImage img_bridge;
+sensor_msgs::Image img_msg;
+std_msgs::Header header; // empty header
+header.stamp = ros::Time::now(); // time stamp
+img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img);
+img_bridge.toImageMsg(img_msg); // from cv_bridge to ROS sensor_msgs::Image
+
+// Publish the ROS message
+image_pub.publish(img_msg);
+

@@ -1,0 +1,41 @@
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/opencv.hpp>
+
+void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+    try
+    {
+        // Convert ROS image message to OpenCV format
+        cv::Mat image = cv_bridge::toCvShare(msg, "bgr8")->image;
+
+        // Do some OpenCV processing on the image
+        cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
+        cv::GaussianBlur(image, image, cv::Size(3, 3), 0, 0);
+
+        // Display the image
+        cv::imshow("Image", image);
+        cv::waitKey(1);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+    }
+}
+
+int main(int argc, char** argv)
+{
+    // Initialize ROS node
+    ros::init(argc, argv, "image_listener");
+    ros::NodeHandle nh;
+
+    // Subscribe to image topic
+    ros::Subscriber sub = nh.subscribe("image_topic", 1, imageCallback);
+
+    // Spin ROS node
+    ros::spin();
+
+    return 0;
+}
+
